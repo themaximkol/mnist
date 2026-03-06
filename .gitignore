@@ -1,0 +1,48 @@
+# ── Virtual Environments ──────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+mnist-env/
+*-env/
+*_env/
+
+# ── Python Artifacts ──────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ── Data & Model Files ────────────────────────────────
+data/
+*.idx3-ubyte
+*.idx1-ubyte
+*.gz
+*.npy
+*.npz
+*.pkl
+*.h5
+
+# ── Jupyter ───────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ── IDE & Editor ──────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Logs & Output ─────────────────────────────────────
+logs/
+*.log
+runs/
+outputs/
+checkpoints/
