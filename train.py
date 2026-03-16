@@ -1,19 +1,12 @@
 import numpy as np
 
 from tqdm import tqdm
-from keras.datasets import mnist
 
 from src.network import Network
 from src.layers import Linear, ReLU
 from src.loss import SoftmaxCEL
 from src.optimizer import SGD
-
-(X_train, y_train), (X_test, y_test) = mnist.load_data()
-X_train = X_train.reshape(60000, 784).astype(np.float64) / 255.0
-X_test = X_test.reshape(10000, 784).astype(np.float64) / 255.0
-
-y_train = np.eye(10)[y_train]  # (60000, 10)
-y_test = np.eye(10)[y_test]  # (10000, 10)
+from src.data_loader import X_train, y_train, X_test, y_test
 
 layers = [Linear(784, 128), ReLU(),
           Linear(128, 64), ReLU(),

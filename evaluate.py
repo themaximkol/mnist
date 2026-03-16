@@ -4,12 +4,12 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 import numpy as np
 import matplotlib.pyplot as plt
-from keras.datasets import mnist
+from src.data_loader import model
 
 from src.network import Network
 from src.layers import Linear, ReLU
 
-(_, _), (X_test, y_test) = mnist.load_data()
+(_, _), (X_test, y_test) = model.load_data()
 
 X_test_flat = X_test.reshape(10000, 784).astype(np.float64) / 255.0
 y_test_onehot = np.eye(10)[y_test]
@@ -31,7 +31,8 @@ print("\nErrors per class:")
 for digit in range(10):
     total_in_class = np.sum(labels == digit)
     errors_in_class = np.sum((labels == digit) & (preds != labels))
-    print(f"  digit {digit}: {errors_in_class:3d} / {total_in_class} wrong  |  {(errors_in_class / total_in_class):.4f}% Error Rate")
+    print(
+        f"  digit {digit}: {errors_in_class:3d} / {total_in_class} wrong  |  {(errors_in_class / total_in_class):.4f}% Error Rate")
 
 # ── Most confused pairs ───────────────────────────────
 print("\nMost common confusions (true → predicted):")

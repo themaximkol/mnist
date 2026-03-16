@@ -23,6 +23,10 @@ class Linear(Layer):
         self.W = np.random.randn(n_in, n_out) * np.sqrt(1 / n_in)
         self.b = np.zeros(n_out)
 
+        # Velocities for SGD with momentum
+        self.vW = None
+        self.vb = None
+
     def forward(self, X):
         self.X = X
         return self.X @ self.W + self.b
