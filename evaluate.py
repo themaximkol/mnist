@@ -4,12 +4,12 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 import numpy as np
 import matplotlib.pyplot as plt
-from src.data_loader import model
+from src.data_loader import dataset
 
 from src.network import Network
 from src.layers import Linear, ReLU
 
-(_, _), (X_test, y_test) = model.load_data()
+(_, _), (X_test, y_test) = dataset.load_data()
 
 X_test_flat = X_test.reshape(10000, 784).astype(np.float64) / 255.0
 y_test_onehot = np.eye(10)[y_test]

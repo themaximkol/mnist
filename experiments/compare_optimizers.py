@@ -4,7 +4,7 @@ import numpy as np
 from src.layers import Linear, ReLU
 from src.network import Network
 from src.loss import SoftmaxCEL
-from src.optimizer import SGD, SGDMomentum
+from src.optimizer import SGD, SGDMomentum, Adam
 from src.data_loader import X_train, y_train
 
 
@@ -32,8 +32,11 @@ def train(optimizer_class, optimizer_kwargs, epochs=10, batch_size=32):
         print("SGD")
     elif isinstance(optimizer, SGDMomentum):
         print("SGDMomentum")
+    elif isinstance(optimizer, Adam):
+        print("Adam")
 
     for epoch in range(epochs):
+        np.random.seed(epoch)
         indices = np.random.permutation(len(X_train))
         X_shuffled = X_train[indices]
         y_shuffled = y_train[indices]
@@ -57,17 +60,19 @@ def train(optimizer_class, optimizer_kwargs, epochs=10, batch_size=32):
     return epoch_losses
 
 
-lr = 0.05
-train_epochs = 15
-momentum_losses = train(SGDMomentum, {'lr': lr, 'beta': 0.9}, epochs=train_epochs)
-sgd_losses = train(SGD, {'lr': lr}, epochs=train_epochs)
+train_epochs = 30
+
+sgd_losses = train(SGD, {'lr': 0.01}, epochs=train_epochs)
+momentum_losses = train(SGDMomentum, {'lr': 0.01, 'beta': 0.9}, epochs=train_epochs)
+adam_losses = train(Adam, {'lr': 0.001}, epochs=train_epochs)
 
 plt.figure(figsize=(15, 5))
 plt.plot(sgd_losses, label='SGD')
 plt.plot(momentum_losses, label='SGD + Momentum')
+plt.plot(adam_losses, label='Adam')
 plt.xlabel('Epoch')
 plt.ylabel('Loss')
-plt.title('SGD vs Momentum')
+plt.title('SGD vs Momentum vs Adam')
 plt.ylim(0, 1)
 plt.legend()
 plt.savefig('comparison.png')
