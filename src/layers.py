@@ -55,3 +55,60 @@ class Dropout(Layer):
             return dX
 
         return dX * self.mask * (1 / (1 - self.p))
+
+
+class BatchNorm(Layer):
+    def __init__(self, n_in, epsilon=1e-5, rho=0.9):
+        self.gamma = np.ones(n_in)
+        self.beta = np.zeros(n_in)
+
+        self.epsilon = epsilon
+        self.rho = rho
+        self.training = True
+
+        # running stats — used at inference
+        self.running_mean = np.zeros(n_in)
+        self.running_var = np.ones(n_in)
+
+    def forward(self, X):
+        if not self.training:
+            X_hat = (X - self.running_mean) / np.sqrt(self.running_var + self.epsilon)
+            return self.gamma * X_hat + self.beta
+
+        self.N = X.shape[0]
+
+        self.mean = np.sum(X, axis=0) / self.N
+        self.variance = np.sum(np.square(X - self.mean), axis=0) / self.N
+
+        self.X_hat = (X - self.mean) / np.sqrt(self.variance + self.epsilon)
+
+        self.running_mean = self.rho * self.running_mean + (1 - self.rho) * self.mean
+        self.running_var = self.rho * self.running_var + (1 - self.rho) * self.variance
+
+        self.X = X
+
+        return self.gamma * self.X_hat + self.beta
+
+    def backward(self, dY):
+        # gradients for learnable params
+        self.dgamma = np.sum(dY * self.X_hat, axis=0)
+        self.dbeta = np.sum(dY, axis=0)
+
+        # gradient w.r.t normalized input
+        dX_hat = dY * self.gamma
+
+        # gradient w.r.t variance — path through normalization
+        dvar = np.sum(
+            dX_hat * (self.X - self.mean) * -0.5 * (self.variance + self.epsilon) ** -1.5,
+            axis=0
+        )
+
+        # gradient w.r.t mean — path through normalization and variance
+        dmean = np.sum(dX_hat * -1 / np.sqrt(self.variance + self.epsilon), axis=0)
+
+        # combine all three paths into dX
+        dX = (dX_hat / np.sqrt(self.variance + self.epsilon) +
+              dvar * 2 * (self.X - self.mean) / self.N +
+              dmean / self.N)
+
+        return dX

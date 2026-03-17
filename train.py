@@ -4,7 +4,7 @@ from tqdm import tqdm
 from src.network import Network
 from src.loss import SoftmaxCEL
 from src.data_loader import X_train, y_train, X_test, y_test
-from src.layers import Linear, ReLU, Dropout
+from src.layers import Linear, ReLU, Dropout, BatchNorm
 from src.optimizer import Adam
 from src.scheduler import ExponentialLR
 
@@ -59,8 +59,8 @@ def train(layers, optimizer, epochs=15, batch_size=32, seed=42, scheduler=None):
             scheduler.step()
 
         for layer in layers:
-            if isinstance(layer, Dropout):
-                layer.training = False
+            if isinstance(layer, (Dropout, BatchNorm)):
+                layer.training = True
 
         train_acc = accuracy(network, X_train, y_train)
         test_acc = accuracy(network, X_test, y_test)
@@ -79,14 +79,14 @@ def train(layers, optimizer, epochs=15, batch_size=32, seed=42, scheduler=None):
 
 
 if __name__ == '__main__':
-    layers = [Linear(784, 128), ReLU(),
-              Linear(128, 64), ReLU(),
+    layers = [Linear(784, 128), BatchNorm(128), ReLU(),
+              Linear(128, 64), BatchNorm(64), ReLU(),
               Linear(64, 10)]
 
     optimizer = Adam(layers, lr=0.001)
     scheduler = ExponentialLR(optimizer, gamma=0.95)
 
     network, losses, train_accs, test_accs = train(
-        layers, optimizer, epochs=20, scheduler=scheduler
+        layers, optimizer, epochs=20, scheduler=scheduler,
     )
     network.save('weights/model')

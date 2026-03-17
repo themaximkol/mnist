@@ -2,7 +2,7 @@ import math
 
 import numpy as np
 
-from src.layers import Linear
+from src.layers import Linear, BatchNorm
 
 
 class SGD:
@@ -71,6 +71,11 @@ class Adam:
 
                 layer.mb = np.zeros_like(layer.b)
                 layer.vb = np.zeros_like(layer.b)
+            if isinstance(layer, BatchNorm):
+                layer.m_gamma = np.zeros_like(layer.gamma)
+                layer.v_gamma = np.zeros_like(layer.gamma)
+                layer.m_beta = np.zeros_like(layer.beta)
+                layer.v_beta = np.zeros_like(layer.beta)
 
     def step(self):
         self.t += 1
@@ -94,3 +99,17 @@ class Adam:
                 # update
                 layer.W -= self.lr * m_hat_W / (np.sqrt(v_hat_W) + self.epsilon)
                 layer.b -= self.lr * m_hat_b / (np.sqrt(v_hat_b) + self.epsilon)
+
+            if isinstance(layer, BatchNorm):
+                layer.m_gamma = self.beta1 * layer.m_gamma + (1 - self.beta1) * layer.dgamma
+                layer.v_gamma = self.beta2 * layer.v_gamma + (1 - self.beta2) * (layer.dgamma ** 2)
+                layer.m_beta = self.beta1 * layer.m_beta + (1 - self.beta1) * layer.dbeta
+                layer.v_beta = self.beta2 * layer.v_beta + (1 - self.beta2) * (layer.dbeta ** 2)
+
+                m_hat_gamma = layer.m_gamma / (1 - self.beta1 ** self.t)
+                v_hat_gamma = layer.v_gamma / (1 - self.beta2 ** self.t)
+                m_hat_beta = layer.m_beta / (1 - self.beta1 ** self.t)
+                v_hat_beta = layer.v_beta / (1 - self.beta2 ** self.t)
+
+                layer.gamma -= self.lr * m_hat_gamma / (np.sqrt(v_hat_gamma) + self.epsilon)
+                layer.beta -= self.lr * m_hat_beta / (np.sqrt(v_hat_beta) + self.epsilon)

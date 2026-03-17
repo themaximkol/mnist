@@ -1,5 +1,7 @@
 import numpy as np
 
+from src.layers import BatchNorm
+
 
 class Network:
     def __init__(self, layers):
@@ -20,6 +22,11 @@ class Network:
             if hasattr(layer, 'W'):
                 weights[f'layer_{i}_W'] = layer.W
                 weights[f'layer_{i}_b'] = layer.b
+            if isinstance(layer, BatchNorm):
+                weights[f'layer_{i}_gamma'] = layer.gamma
+                weights[f'layer_{i}_beta'] = layer.beta
+                weights[f'layer_{i}_running_mean'] = layer.running_mean
+                weights[f'layer_{i}_running_var'] = layer.running_var
         np.savez(path, **weights)
         print(f"Weights saved to {path}.npz")
 
@@ -29,4 +36,9 @@ class Network:
             if hasattr(layer, 'W'):
                 layer.W = weights[f'layer_{i}_W']
                 layer.b = weights[f'layer_{i}_b']
+            if isinstance(layer, BatchNorm):
+                layer.gamma = weights[f'layer_{i}_gamma']
+                layer.beta = weights[f'layer_{i}_beta']
+                layer.running_mean = weights[f'layer_{i}_running_mean']
+                layer.running_var = weights[f'layer_{i}_running_var']
         print(f"Weights loaded from {path}.npz")
